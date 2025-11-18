@@ -218,7 +218,7 @@ MIT License - see LICENSE file for details
 
 ## 👨‍💻 Author / Geliştirici
 
-**İhsan Bakıdoğan (ibidi)**
+**İhsan Baki Doğan**
 
 - LinkedIn: [linkedin.com/in/ibidi](https://linkedin.com/in/ibidi)
 - Instagram: [instagram.com/ihsanbakidogann](https://instagram.com/ihsanbakidogann)
