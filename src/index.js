@@ -1,13 +1,76 @@
 const axios = require('axios');
+const YahooFinance = require('yahoo-finance2').default;
 
 /**
  * Borsa API - Turkish Stock Market Data
  * BIST (Borsa İstanbul) verilerini çeker
+ * 
+ * Yahoo Finance API kullanarak gerçek zamanlı veri sağlar.
  */
 class BorsaAPI {
   constructor(options = {}) {
-    this.baseURL = options.baseURL || 'https://api.bigpara.hurriyet.com.tr';
+    this.baseURL = options.baseURL || 'https://api.genelpara.com';
     this.timeout = options.timeout || 10000;
+    this.useMockData = options.useMockData === true; // Default false (use real data)
+    this.useYahoo = options.useYahoo !== false; // Default true
+    this.yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
+  }
+
+  /**
+   * Mock data generator
+   * @private
+   */
+  _generateMockData() {
+    const stocks = [
+      { code: 'THYAO', name: 'TURK HAVA YOLLARI', basePrice: 234.50 },
+      { code: 'GARAN', name: 'GARANTI BANKASI', basePrice: 89.75 },
+      { code: 'EREGL', name: 'EREGLI DEMIR CELIK', basePrice: 45.20 },
+      { code: 'AKBNK', name: 'AKBANK', basePrice: 56.80 },
+      { code: 'TUPRS', name: 'TUPRAS', basePrice: 178.90 },
+      { code: 'SAHOL', name: 'SABANCI HOLDING', basePrice: 67.30 },
+      { code: 'ISCTR', name: 'IS BANKASI', basePrice: 12.45 },
+      { code: 'KCHOL', name: 'KOC HOLDING', basePrice: 145.60 },
+      { code: 'ASELS', name: 'ASELSAN', basePrice: 89.40 },
+      { code: 'BIMAS', name: 'BIM', basePrice: 456.70 }
+    ];
+
+    const indexes = [
+      { code: 'XU100', name: 'BIST 100', baseValue: 9234.56 },
+      { code: 'XU030', name: 'BIST 30', baseValue: 10456.78 },
+      { code: 'XBANK', name: 'BIST BANKA', baseValue: 7890.12 },
+      { code: 'XUSIN', name: 'BIST SINAI', baseValue: 5678.90 },
+      { code: 'XGIDA', name: 'BIST GIDA', baseValue: 3456.78 },
+      { code: 'XHOLD', name: 'BIST HOLDING', baseValue: 8901.23 },
+      { code: 'XUTEK', name: 'BIST TEKNOLOJI', baseValue: 4567.89 }
+    ];
+
+    return [...stocks, ...indexes].map(item => {
+      const isIndex = item.code.startsWith('X');
+      const baseValue = item.basePrice || item.baseValue;
+      const randomChange = (Math.random() - 0.5) * 10;
+      const value = baseValue + randomChange;
+      const change = randomChange;
+      const changePercent = (change / baseValue) * 100;
+
+      return {
+        code: item.code,
+        name: item.name,
+        price: value,
+        last: value,
+        value: value,
+        change: change,
+        diff: change,
+        rate: changePercent,
+        changePercent: changePercent,
+        high: value + Math.abs(randomChange) * 0.5,
+        low: value - Math.abs(randomChange) * 0.5,
+        open: baseValue,
+        close: baseValue,
+        volume: Math.floor(Math.random() * 10000000) + 1000000,
+        type: isIndex ? 'index' : 'stock',
+        time: new Date().toISOString()
+      };
+    });
   }
 
   /**
@@ -17,11 +80,60 @@ class BorsaAPI {
    */
   async getIndex(symbol = 'XU100') {
     try {
-      const response = await axios.get(`${this.baseURL}/endeks/api/endeks/${symbol}`, {
-        timeout: this.timeout
-      });
-      return this._formatIndexData(response.data);
+      let data;
+      
+      if (this.useMockData) {
+        // Use mock data
+        const mockData = this._generateMockData();
+        const indexData = mockData.find(item => item.code === symbol);
+        if (!indexData) {
+          throw new Error(`${symbol} endeksi bulunamadı`);
+        }
+        data = indexData;
+      } else if (this.useYahoo) {
+        // Use Yahoo Finance
+        const yahooSymbol = `${symbol}.IS`; // BIST symbols end with .IS
+        const quote = await this.yahooFinance.quoteSummary(yahooSymbol, { modules: ['price'] });
+        const priceData = quote.price;
+        
+        data = {
+          code: symbol,
+          name: priceData.longName || priceData.shortName || symbol,
+          price: priceData.regularMarketPrice?.raw || priceData.regularMarketPrice,
+          last: priceData.regularMarketPrice?.raw || priceData.regularMarketPrice,
+          value: priceData.regularMarketPrice?.raw || priceData.regularMarketPrice,
+          change: priceData.regularMarketChange?.raw || priceData.regularMarketChange,
+          diff: priceData.regularMarketChange?.raw || priceData.regularMarketChange,
+          rate: priceData.regularMarketChangePercent?.raw || priceData.regularMarketChangePercent,
+          changePercent: priceData.regularMarketChangePercent?.raw || priceData.regularMarketChangePercent,
+          high: priceData.regularMarketDayHigh?.raw || priceData.regularMarketDayHigh,
+          low: priceData.regularMarketDayLow?.raw || priceData.regularMarketDayLow,
+          open: priceData.regularMarketOpen?.raw || priceData.regularMarketOpen,
+          close: priceData.regularMarketPreviousClose?.raw || priceData.regularMarketPreviousClose,
+          volume: priceData.regularMarketVolume?.raw || priceData.regularMarketVolume,
+          time: new Date().toISOString()
+        };
+      } else {
+        // Try other API
+        const response = await axios.get(`${this.baseURL}/embed/borsa.json`, {
+          timeout: this.timeout,
+          headers: {
+            'User-Agent': 'Mozilla/5.0'
+          }
+        });
+        
+        const indexData = response.data.find(item => item.code === symbol);
+        if (!indexData) {
+          throw new Error(`${symbol} endeksi bulunamadı`);
+        }
+        data = indexData;
+      }
+      
+      return this._formatIndexData(data);
     } catch (error) {
+      if (error.message.includes('bulunamadı')) {
+        throw error;
+      }
       throw new Error(`Endeks verisi alınamadı: ${error.message}`);
     }
   }
@@ -33,11 +145,66 @@ class BorsaAPI {
    */
   async getStock(symbol) {
     try {
-      const response = await axios.get(`${this.baseURL}/hisse/api/hisse/${symbol}`, {
-        timeout: this.timeout
-      });
-      return this._formatStockData(response.data);
+      let data;
+      
+      if (this.useMockData) {
+        // Use mock data
+        const mockData = this._generateMockData();
+        const stockData = mockData.find(item => 
+          item.code === symbol.toUpperCase() || item.code === symbol.toUpperCase() + '.E'
+        );
+        
+        if (!stockData) {
+          throw new Error(`${symbol} hissesi bulunamadı`);
+        }
+        data = stockData;
+      } else if (this.useYahoo) {
+        // Use Yahoo Finance
+        const yahooSymbol = `${symbol.toUpperCase()}.IS`; // BIST symbols end with .IS
+        const quote = await this.yahooFinance.quoteSummary(yahooSymbol, { modules: ['price'] });
+        const priceData = quote.price;
+        
+        data = {
+          code: symbol.toUpperCase(),
+          name: priceData.longName || priceData.shortName || symbol,
+          price: priceData.regularMarketPrice?.raw || priceData.regularMarketPrice,
+          last: priceData.regularMarketPrice?.raw || priceData.regularMarketPrice,
+          value: priceData.regularMarketPrice?.raw || priceData.regularMarketPrice,
+          change: priceData.regularMarketChange?.raw || priceData.regularMarketChange,
+          diff: priceData.regularMarketChange?.raw || priceData.regularMarketChange,
+          rate: priceData.regularMarketChangePercent?.raw || priceData.regularMarketChangePercent,
+          changePercent: priceData.regularMarketChangePercent?.raw || priceData.regularMarketChangePercent,
+          high: priceData.regularMarketDayHigh?.raw || priceData.regularMarketDayHigh,
+          low: priceData.regularMarketDayLow?.raw || priceData.regularMarketDayLow,
+          open: priceData.regularMarketOpen?.raw || priceData.regularMarketOpen,
+          close: priceData.regularMarketPreviousClose?.raw || priceData.regularMarketPreviousClose,
+          volume: priceData.regularMarketVolume?.raw || priceData.regularMarketVolume,
+          time: new Date().toISOString()
+        };
+      } else {
+        // Try other API
+        const response = await axios.get(`${this.baseURL}/embed/borsa.json`, {
+          timeout: this.timeout,
+          headers: {
+            'User-Agent': 'Mozilla/5.0'
+          }
+        });
+        
+        const stockData = response.data.find(item => 
+          item.code === symbol || item.code === symbol + '.E'
+        );
+        
+        if (!stockData) {
+          throw new Error(`${symbol} hissesi bulunamadı`);
+        }
+        data = stockData;
+      }
+      
+      return this._formatStockData(data);
     } catch (error) {
+      if (error.message.includes('bulunamadı')) {
+        throw error;
+      }
       throw new Error(`Hisse verisi alınamadı: ${error.message}`);
     }
   }
@@ -48,10 +215,44 @@ class BorsaAPI {
    */
   async getPopularStocks() {
     try {
-      const response = await axios.get(`${this.baseURL}/hisse/api/populer`, {
-        timeout: this.timeout
-      });
-      return response.data.map(stock => this._formatStockData(stock));
+      // Popular BIST stocks
+      const popularSymbols = ['THYAO', 'GARAN', 'EREGL', 'AKBNK', 'TUPRS', 
+                              'SAHOL', 'ISCTR', 'KCHOL', 'ASELS', 'BIMAS'];
+      
+      if (this.useMockData) {
+        const mockData = this._generateMockData();
+        const stocks = mockData
+          .filter(item => popularSymbols.includes(item.code))
+          .slice(0, 10);
+        return stocks.map(stock => this._formatStockData(stock));
+      } else if (this.useYahoo) {
+        // Fetch multiple stocks from Yahoo Finance
+        const promises = popularSymbols.map(async (symbol) => {
+          try {
+            return await this.getStock(symbol);
+          } catch (error) {
+            return null;
+          }
+        });
+        
+        const results = await Promise.all(promises);
+        return results.filter(stock => stock !== null);
+      } else {
+        const response = await axios.get(`${this.baseURL}/embed/borsa.json`, {
+          timeout: this.timeout,
+          headers: {
+            'User-Agent': 'Mozilla/5.0'
+          }
+        });
+        
+        const stocks = response.data
+          .filter(item => item.type === 'stock' || !item.type)
+          .filter(item => !item.code.startsWith('X'))
+          .sort((a, b) => (b.volume || 0) - (a.volume || 0))
+          .slice(0, 20);
+        
+        return stocks.map(stock => this._formatStockData(stock));
+      }
     } catch (error) {
       throw new Error(`Popüler hisseler alınamadı: ${error.message}`);
     }
@@ -63,9 +264,29 @@ class BorsaAPI {
    */
   async getAllIndexes() {
     try {
-      const indexes = ['XU100', 'XU030', 'XBANK', 'XUSIN', 'XGIDA', 'XHOLD', 'XUTEK'];
-      const promises = indexes.map(symbol => this.getIndex(symbol));
-      return await Promise.all(promises);
+      let indexes;
+      
+      if (this.useMockData) {
+        // Use mock data
+        const mockData = this._generateMockData();
+        indexes = mockData
+          .filter(item => item.code && item.code.startsWith('X'))
+          .slice(0, 7);
+      } else {
+        // Try real API
+        const response = await axios.get(`${this.baseURL}/embed/borsa.json`, {
+          timeout: this.timeout,
+          headers: {
+            'User-Agent': 'Mozilla/5.0'
+          }
+        });
+        
+        indexes = response.data
+          .filter(item => item.code && item.code.startsWith('X'))
+          .slice(0, 10);
+      }
+      
+      return indexes.map(index => this._formatIndexData(index));
     } catch (error) {
       throw new Error(`Endeksler alınamadı: ${error.message}`);
     }
@@ -78,10 +299,33 @@ class BorsaAPI {
    */
   async searchStock(query) {
     try {
-      const response = await axios.get(`${this.baseURL}/hisse/api/ara/${query}`, {
-        timeout: this.timeout
-      });
-      return response.data.map(stock => this._formatStockData(stock));
+      let results;
+      
+      if (this.useMockData) {
+        // Use mock data
+        const mockData = this._generateMockData();
+        const searchTerm = query.toLowerCase();
+        results = mockData.filter(item => 
+          (item.code && item.code.toLowerCase().includes(searchTerm)) ||
+          (item.name && item.name.toLowerCase().includes(searchTerm))
+        );
+      } else {
+        // Try real API
+        const response = await axios.get(`${this.baseURL}/embed/borsa.json`, {
+          timeout: this.timeout,
+          headers: {
+            'User-Agent': 'Mozilla/5.0'
+          }
+        });
+        
+        const searchTerm = query.toLowerCase();
+        results = response.data.filter(item => 
+          (item.code && item.code.toLowerCase().includes(searchTerm)) ||
+          (item.name && item.name.toLowerCase().includes(searchTerm))
+        );
+      }
+      
+      return results.map(stock => this._formatStockData(stock));
     } catch (error) {
       throw new Error(`Arama yapılamadı: ${error.message}`);
     }
@@ -92,16 +336,20 @@ class BorsaAPI {
    * @private
    */
   _formatIndexData(data) {
+    const value = parseFloat(data.price || data.last || data.value || 0);
+    const change = parseFloat(data.change || data.diff || 0);
+    const changePercent = parseFloat(data.rate || data.changePercent || 0);
+    
     return {
-      symbol: data.sembol || data.symbol,
-      name: data.ad || data.name,
-      value: parseFloat(data.deger || data.value),
-      change: parseFloat(data.degisim || data.change),
-      changePercent: parseFloat(data.yuzdelik || data.changePercent),
-      high: parseFloat(data.yuksek || data.high),
-      low: parseFloat(data.dusuk || data.low),
-      volume: parseFloat(data.hacim || data.volume),
-      timestamp: data.zaman || data.timestamp || new Date().toISOString()
+      symbol: data.code || data.symbol,
+      name: data.name || data.text || data.code,
+      value: value,
+      change: change,
+      changePercent: changePercent,
+      high: parseFloat(data.high || value),
+      low: parseFloat(data.low || value),
+      volume: parseFloat(data.volume || 0),
+      timestamp: data.time || data.timestamp || new Date().toISOString()
     };
   }
 
@@ -110,18 +358,22 @@ class BorsaAPI {
    * @private
    */
   _formatStockData(data) {
+    const price = parseFloat(data.price || data.last || data.value || 0);
+    const change = parseFloat(data.change || data.diff || 0);
+    const changePercent = parseFloat(data.rate || data.changePercent || 0);
+    
     return {
-      symbol: data.sembol || data.symbol,
-      name: data.ad || data.name,
-      price: parseFloat(data.fiyat || data.price),
-      change: parseFloat(data.degisim || data.change),
-      changePercent: parseFloat(data.yuzdelik || data.changePercent),
-      high: parseFloat(data.yuksek || data.high),
-      low: parseFloat(data.dusuk || data.low),
-      open: parseFloat(data.acilis || data.open),
-      close: parseFloat(data.kapanis || data.close),
-      volume: parseFloat(data.hacim || data.volume),
-      timestamp: data.zaman || data.timestamp || new Date().toISOString()
+      symbol: data.code || data.symbol,
+      name: data.name || data.text || data.code,
+      price: price,
+      change: change,
+      changePercent: changePercent,
+      high: parseFloat(data.high || price),
+      low: parseFloat(data.low || price),
+      open: parseFloat(data.open || price),
+      close: parseFloat(data.close || price),
+      volume: parseFloat(data.volume || 0),
+      timestamp: data.time || data.timestamp || new Date().toISOString()
     };
   }
 }

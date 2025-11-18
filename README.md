@@ -226,6 +226,10 @@ MIT License - see LICENSE file for details
 
 ## ⚠️ Disclaimer / Uyarı
 
+**Demo Mode:** This version uses mock/demo data for demonstration purposes. For real-time data, you'll need to integrate with a real BIST API provider.
+
+**Demo Modu:** Bu sürüm demo amaçlı örnek veri kullanmaktadır. Gerçek zamanlı veriler için gerçek bir BIST API sağlayıcısı ile entegrasyon gereklidir.
+
 This tool is for informational purposes only. Not financial advice.
 
 Bu araç sadece bilgilendirme amaçlıdır. Yatırım tavsiyesi değildir.
