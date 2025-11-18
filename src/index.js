@@ -1,19 +1,19 @@
 const axios = require('axios');
-const YahooFinance = require('yahoo-finance2').default;
+const DataProvider = require('./data-provider');
 
 /**
  * Borsa API - Turkish Stock Market Data
  * BIST (Borsa İstanbul) verilerini çeker
  * 
- * Yahoo Finance API kullanarak gerçek zamanlı veri sağlar.
+ * Gerçek zamanlı borsa verilerini sağlar.
  */
 class BorsaAPI {
   constructor(options = {}) {
     this.baseURL = options.baseURL || 'https://api.genelpara.com';
     this.timeout = options.timeout || 10000;
     this.useMockData = options.useMockData === true; // Default false (use real data)
-    this.useYahoo = options.useYahoo !== false; // Default true
-    this.yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
+    this.useRealData = options.useRealData !== false; // Default true
+    this._provider = new DataProvider();
   }
 
   /**
@@ -90,11 +90,10 @@ class BorsaAPI {
           throw new Error(`${symbol} endeksi bulunamadı`);
         }
         data = indexData;
-      } else if (this.useYahoo) {
-        // Use Yahoo Finance
-        const yahooSymbol = `${symbol}.IS`; // BIST symbols end with .IS
-        const quote = await this.yahooFinance.quoteSummary(yahooSymbol, { modules: ['price'] });
-        const priceData = quote.price;
+      } else if (this.useRealData) {
+        // Use real-time data provider
+        const symbol_code = `${symbol}.IS`; // BIST format
+        const priceData = await this._provider.fetchQuote(symbol_code);
         
         data = {
           code: symbol,
@@ -158,11 +157,10 @@ class BorsaAPI {
           throw new Error(`${symbol} hissesi bulunamadı`);
         }
         data = stockData;
-      } else if (this.useYahoo) {
-        // Use Yahoo Finance
-        const yahooSymbol = `${symbol.toUpperCase()}.IS`; // BIST symbols end with .IS
-        const quote = await this.yahooFinance.quoteSummary(yahooSymbol, { modules: ['price'] });
-        const priceData = quote.price;
+      } else if (this.useRealData) {
+        // Use real-time data provider
+        const symbol_code = `${symbol.toUpperCase()}.IS`; // BIST format
+        const priceData = await this._provider.fetchQuote(symbol_code);
         
         data = {
           code: symbol.toUpperCase(),
@@ -225,8 +223,8 @@ class BorsaAPI {
           .filter(item => popularSymbols.includes(item.code))
           .slice(0, 10);
         return stocks.map(stock => this._formatStockData(stock));
-      } else if (this.useYahoo) {
-        // Fetch multiple stocks from Yahoo Finance
+      } else if (this.useRealData) {
+        // Fetch multiple stocks from real-time provider
         const promises = popularSymbols.map(async (symbol) => {
           try {
             return await this.getStock(symbol);
@@ -272,8 +270,20 @@ class BorsaAPI {
         indexes = mockData
           .filter(item => item.code && item.code.startsWith('X'))
           .slice(0, 7);
+      } else if (this.useRealData) {
+        // Fetch from real-time provider
+        const indexSymbols = ['XU100', 'XU030', 'XBANK', 'XUSIN', 'XGIDA', 'XHOLD', 'XUTEK'];
+        const promises = indexSymbols.map(async (symbol) => {
+          try {
+            return await this.getIndex(symbol);
+          } catch (error) {
+            return null;
+          }
+        });
+        
+        indexes = (await Promise.all(promises)).filter(idx => idx !== null);
       } else {
-        // Try real API
+        // Try other API
         const response = await axios.get(`${this.baseURL}/embed/borsa.json`, {
           timeout: this.timeout,
           headers: {
@@ -309,8 +319,17 @@ class BorsaAPI {
           (item.code && item.code.toLowerCase().includes(searchTerm)) ||
           (item.name && item.name.toLowerCase().includes(searchTerm))
         );
+      } else if (this.useRealData) {
+        // Search in popular stocks
+        const popularStocks = await this.getPopularStocks();
+        const searchTerm = query.toLowerCase();
+        results = popularStocks.filter(item => 
+          (item.symbol && item.symbol.toLowerCase().includes(searchTerm)) ||
+          (item.name && item.name.toLowerCase().includes(searchTerm))
+        );
+        return results;
       } else {
-        // Try real API
+        // Try other API
         const response = await axios.get(`${this.baseURL}/embed/borsa.json`, {
           timeout: this.timeout,
           headers: {

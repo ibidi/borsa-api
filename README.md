@@ -10,11 +10,12 @@ Türk Borsası (BIST) için API wrapper ve CLI aracı.
 ## 🚀 Features / Özellikler
 
 - 📊 **BIST Indexes** - XU100, XU030, XBANK, and more
-- 📈 **Stock Data** - Real-time stock prices and information
+- 📈 **Real-time Stock Data** - Live stock prices and information
 - 🔍 **Search** - Find stocks by name or symbol
-- 💻 **CLI Tool** - Beautiful terminal interface
+- 💻 **Beautiful CLI** - Professional terminal interface with colors and tables
 - 📦 **API Wrapper** - Use programmatically in your code
 - 🇹🇷 **Turkish Support** - Native Turkish language support
+- ⚡ **Fast & Reliable** - Optimized for performance
 
 ## 📦 Installation / Kurulum
 

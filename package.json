@@ -8,7 +8,9 @@
   },
   "scripts": {
     "test": "node bin/cli.js",
-    "start": "node bin/cli.js"
+    "start": "node bin/cli.js",
+    "build": "node build.js",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "borsa",
@@ -44,5 +46,8 @@
     "commander": "^11.1.0",
     "ora": "^5.4.1",
     "yahoo-finance2": "^3.10.2"
+  },
+  "devDependencies": {
+    "javascript-obfuscator": "^4.1.1"
   }
 }
