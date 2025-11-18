@@ -1,11 +1,25 @@
-# borsa-api 📈
+<div align="center">
 
-Turkish Stock Market (BIST) API wrapper with beautiful CLI support.
+# 📈 borsa-api
 
-Türk Borsası (BIST) için API wrapper ve CLI aracı.
+### Turkish Stock Market (BIST) API Wrapper & CLI Tool
 
-[![npm version](https://img.shields.io/npm/v/borsa-api?style=flat-square)](https://www.npmjs.com/package/borsa-api)
-[![license](https://img.shields.io/npm/l/borsa-api?style=flat-square)](https://github.com/ibidi/borsa-api/blob/main/LICENSE)
+**Türk Borsası (BIST) için API wrapper ve CLI aracı**
+
+[![npm version](https://img.shields.io/npm/v/borsa-api?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/borsa-api)
+[![npm downloads](https://img.shields.io/npm/dm/borsa-api?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/borsa-api)
+[![license](https://img.shields.io/npm/l/borsa-api?style=for-the-badge)](https://github.com/ibidi/borsa-api/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/ibidi/borsa-api?style=for-the-badge&logo=github)](https://github.com/ibidi/borsa-api)
+
+[Installation](#-installation--kurulum) •
+[Features](#-features--özellikler) •
+[Usage](#-cli-usage--cli-kullanımı) •
+[API](#-programmatic-usage--kod-içinde-kullanım) •
+[Examples](#-usage-example)
+
+</div>
+
+---
 
 ## 🚀 Features / Özellikler
 
@@ -218,12 +232,20 @@ MIT License - see LICENSE file for details
 
 ## 👨‍💻 Author / Geliştirici
 
-**İhsan Baki Doğan**
+<div align="center">
 
-- LinkedIn: [linkedin.com/in/ibidi](https://linkedin.com/in/ibidi)
-- Instagram: [instagram.com/ihsanbakidogann](https://instagram.com/ihsanbakidogann)
-- X (Twitter): [x.com/ihsanbakidogan](https://x.com/ihsanbakidogan)
-- GitHub: [github.com/ibidi](https://github.com/ibidi)
+### İhsan Baki Doğan
+
+**Full Stack Developer | Open Source Enthusiast**
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/ibidi)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ibidi)
+[![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://instagram.com/ihsanbakidogann)
+[![X](https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/ihsanbakidogan)
+
+📧 ihsanbakidogan@gmail.com
+
+</div>
 
 ## ⚠️ Disclaimer / Uyarı
 
