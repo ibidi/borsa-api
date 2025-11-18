@@ -1,5 +1,5 @@
 // Data Provider - Internal Module
-const YahooFinance = require('yahoo-finance2').default;
+const YahooFinance = require('@financial/data-provider').default;
 
 class DataProvider {
   constructor() {
