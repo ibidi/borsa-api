@@ -1,0 +1,52 @@
+{
+  "name": "borsa-api",
+  "version": "1.0.2",
+  "description": "Turkish Stock Market (BIST) API wrapper with CLI support - Türk borsası için API ve CLI aracı",
+  "main": "src/index.js",
+  "bin": {
+    "borsa": "./bin/cli.js"
+  },
+  "scripts": {
+    "test": "node bin/cli.js",
+    "start": "node bin/cli.js"
+  },
+  "keywords": [
+    "borsa",
+    "bist",
+    "stock",
+    "market",
+    "turkey",
+    "turkish",
+    "finance",
+    "trading",
+    "hisse",
+    "endeks",
+    "cli",
+    "api"
+  ],
+  "author": "ibidi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ibidi/borsa-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ibidi/borsa-api/issues"
+  },
+  "homepage": "https://github.com/ibidi/borsa-api#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "@financial/data-provider": "npm:yahoo-finance2@^3.10.2",
+    "axios": "^1.6.2",
+    "chalk": "^4.1.2",
+    "cli-table3": "^0.6.3",
+    "commander": "^11.1.0",
+    "ora": "^5.4.1",
+    "yahoo-finance2": "^3.10.2"
+  },
+  "devDependencies": {
+    "javascript-obfuscator": "^4.1.1"
+  }
+}
