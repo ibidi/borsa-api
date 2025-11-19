@@ -2,12 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.3] - 2024-11-19
+## [1.0.4] - 2024-11-19
+
+### Added
+- Comprehensive disclaimer about data source and licensing
+- FAQ section addressing licensing and data usage questions
+- Clear notice about delayed data and educational use only
+- Updated package description with licensing information
 
 ### Fixed
 - Turkish character normalization in search functionality
 - Search now works with both Turkish and ASCII characters (e.g., "koç" and "koc" both work)
 - Improved search accuracy for Turkish company names
+
+## [1.0.3] - 2024-11-19
+
+### Fixed
+- Turkish character normalization in search functionality
 
 ## [1.0.2] - 2024-11-18
 

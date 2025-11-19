@@ -1,7 +1,7 @@
 {
   "name": "borsa-api",
-  "version": "1.0.3",
-  "description": "Turkish Stock Market (BIST) API wrapper with CLI support - Türk borsası için API ve CLI aracı",
+  "version": "1.0.4",
+  "description": "Turkish Stock Market (BIST) API wrapper with CLI support - Delayed data for educational use only - Türk borsası için API ve CLI aracı - Sadece eğitim amaçlı gecikmeli veri",
   "main": "src/index.js",
   "bin": {
     "borsa": "./bin/cli.js"
@@ -22,7 +22,10 @@
     "hisse",
     "endeks",
     "cli",
-    "api"
+    "api",
+    "delayed-data",
+    "educational",
+    "yahoo-finance"
   ],
   "author": "ibidi",
   "license": "MIT",

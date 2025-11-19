@@ -12,7 +12,7 @@ const api = new BorsaAPI();
 program
   .name('borsa')
   .description('Türk Borsası (BIST) CLI aracı')
-  .version('1.0.3');
+  .version('1.0.4');
 
 // Endeks komutu
 program

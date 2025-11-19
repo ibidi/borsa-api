@@ -216,6 +216,66 @@ Search stocks / Hisse ara
 - `XHOLD` - Holding Endeksi
 - `XUTEK` - Teknoloji Endeksi
 
+## ❓ FAQ / Sık Sorulan Sorular
+
+### Veri kaynağınız nedir?
+
+Bu paket Yahoo Finance gibi üçüncü parti kaynaklardan **gecikmeli ve halka açık** borsa verilerini çeker. BIST'in resmi API'si değildir.
+
+### Veriler gerçek zamanlı mı?
+
+Hayır. Veriler gecikmeli (delayed) olarak sağlanır. Gerçek zamanlı veri için BIST'ten resmi lisans almanız gerekmektedir.
+
+### Lisans durumu nedir?
+
+BIST verileri telif hakkı ve lisans haklarına tabidir. Bu paket:
+- Sadece gecikmeli ve halka açık verileri kullanır
+- Eğitim ve kişisel kullanım içindir
+- Ticari veri dağıtımı yapmaz
+- Gerçek zamanlı veri dağıtımı için BIST lisansı gereklidir
+
+### Ticari projemde kullanabilir miyim?
+
+Bu paket eğitim ve kişisel kullanım amaçlıdır. Ticari kullanım için:
+1. BIST'ten resmi veri dağıtım lisansı almanız
+2. Veri sağlayıcınızın (Yahoo Finance vb.) kullanım koşullarına uymanız gerekir
+
+### Yatırım kararlarımda kullanabilir miyim?
+
+Bu araç sadece bilgilendirme amaçlıdır, yatırım tavsiyesi değildir. Yatırım kararlarınızı verirken:
+- Profesyonel danışmanlık alın
+- Güncel ve resmi kaynaklardan veri kullanın
+- Risk yönetimi yapın
+
+### What is your data source?
+
+This package fetches **delayed and publicly available** stock market data from third-party sources like Yahoo Finance. It is not an official BIST API.
+
+### Is the data real-time?
+
+No. Data is provided with delay. For real-time data, you need to obtain an official license from BIST.
+
+### What about licensing?
+
+BIST data is subject to copyright and licensing rights. This package:
+- Only uses delayed and publicly available data
+- Is for educational and personal use
+- Does not distribute commercial data
+- Real-time data distribution requires BIST license
+
+### Can I use it in my commercial project?
+
+This package is for educational and personal use. For commercial use:
+1. You need to obtain an official data distribution license from BIST
+2. You must comply with your data provider's (Yahoo Finance, etc.) terms of service
+
+### Can I use it for investment decisions?
+
+This tool is for informational purposes only, not financial advice. When making investment decisions:
+- Consult with professionals
+- Use current and official data sources
+- Practice risk management
+
 ## 🤝 Contributing / Katkıda Bulunma
 
 Contributions are welcome! / Katkılarınızı bekliyoruz!
@@ -249,13 +309,45 @@ MIT License - see LICENSE file for details
 
 ## ⚠️ Disclaimer / Uyarı
 
-**Demo Mode:** This version uses mock/demo data for demonstration purposes. For real-time data, you'll need to integrate with a real BIST API provider.
+### Veri Kaynağı ve Lisans / Data Source & License
 
-**Demo Modu:** Bu sürüm demo amaçlı örnek veri kullanmaktadır. Gerçek zamanlı veriler için gerçek bir BIST API sağlayıcısı ile entegrasyon gereklidir.
+**Önemli:** Bu paket, Yahoo Finance gibi üçüncü parti kaynaklardan **gecikmeli ve halka açık** borsa verilerini çeker. 
 
-This tool is for informational purposes only. Not financial advice.
+- ✅ Veriler **gecikmeli** (delayed) olarak sağlanır
+- ✅ Eğitim ve kişisel kullanım amaçlıdır
+- ❌ BIST'in resmi API'si değildir
+- ❌ Gerçek zamanlı (real-time) veri sağlamaz
+- ❌ Ticari kullanım için uygun değildir
 
-Bu araç sadece bilgilendirme amaçlıdır. Yatırım tavsiyesi değildir.
+**Important:** This package fetches **delayed and publicly available** stock market data from third-party sources like Yahoo Finance.
+
+- ✅ Data is provided with **delay**
+- ✅ For educational and personal use
+- ❌ Not an official BIST API
+- ❌ Does not provide real-time data
+- ❌ Not suitable for commercial use
+
+### Lisans Uyarısı / License Notice
+
+BIST verileri telif hakkı, lisans ve dağıtım haklarına tabidir. Gerçek zamanlı veri dağıtımı için BIST'ten resmi lisans almanız gerekmektedir. Bu paket:
+
+- Sadece gecikmeli ve halka açık verileri kullanır
+- Eğitim ve araştırma amaçlıdır
+- Ticari veri dağıtımı yapmaz
+- Kullanıcıların kendi sorumluluğundadır
+
+BIST data is subject to copyright, licensing, and distribution rights. For real-time data distribution, you need to obtain an official license from BIST. This package:
+
+- Only uses delayed and publicly available data
+- Is for educational and research purposes
+- Does not distribute commercial data
+- Users are responsible for their own usage
+
+### Yatırım Tavsiyesi Değildir / Not Financial Advice
+
+Bu araç sadece bilgilendirme amaçlıdır. Yatırım tavsiyesi değildir. Yatırım kararlarınızı verirken profesyonel danışmanlık alınız.
+
+This tool is for informational purposes only. Not financial advice. Consult with professionals before making investment decisions.
 
 ---
 
