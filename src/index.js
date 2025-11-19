@@ -1,5 +1,7 @@
 const axios = require('axios');
 const DataProvider = require('./data-provider');
+const WatchlistManager = require('./watchlist');
+const utils = require('./utils');
 
 /**
  * Borsa API - Turkish Stock Market Data
@@ -14,6 +16,8 @@ class BorsaAPI {
     this.useMockData = options.useMockData === true; // Default false (use real data)
     this.useRealData = options.useRealData !== false; // Default true
     this._provider = new DataProvider();
+    this.watchlist = new WatchlistManager();
+    this.utils = utils;
   }
 
   /**
@@ -410,6 +414,102 @@ class BorsaAPI {
       volume: parseFloat(data.volume || 0),
       timestamp: data.time || data.timestamp || new Date().toISOString()
     };
+  }
+
+  /**
+   * İki hisseyi karşılaştır
+   * @param {string} symbol1 - İlk hisse sembolü
+   * @param {string} symbol2 - İkinci hisse sembolü
+   * @returns {Promise<Object>}
+   */
+  async compareStocks(symbol1, symbol2) {
+    try {
+      const [stock1, stock2] = await Promise.all([
+        this.getStock(symbol1),
+        this.getStock(symbol2)
+      ]);
+
+      return {
+        stock1,
+        stock2,
+        comparison: {
+          priceDiff: stock1.price - stock2.price,
+          changeDiff: stock1.changePercent - stock2.changePercent,
+          volumeDiff: stock1.volume - stock2.volume
+        }
+      };
+    } catch (error) {
+      throw new Error(`Karşılaştırma yapılamadı: ${error.message}`);
+    }
+  }
+
+  /**
+   * En çok yükselenleri getir
+   * @param {number} limit - Limit
+   * @returns {Promise<Array>}
+   */
+  async getTopGainers(limit = 10) {
+    try {
+      const stocks = await this.getPopularStocks();
+      return utils.getTopGainers(stocks, limit);
+    } catch (error) {
+      throw new Error(`En çok yükselenler alınamadı: ${error.message}`);
+    }
+  }
+
+  /**
+   * En çok düşenleri getir
+   * @param {number} limit - Limit
+   * @returns {Promise<Array>}
+   */
+  async getTopLosers(limit = 10) {
+    try {
+      const stocks = await this.getPopularStocks();
+      return utils.getTopLosers(stocks, limit);
+    } catch (error) {
+      throw new Error(`En çok düşenler alınamadı: ${error.message}`);
+    }
+  }
+
+  /**
+   * En yüksek hacimli hisseleri getir
+   * @param {number} limit - Limit
+   * @returns {Promise<Array>}
+   */
+  async getTopVolume(limit = 10) {
+    try {
+      const stocks = await this.getPopularStocks();
+      return utils.getTopVolume(stocks, limit);
+    } catch (error) {
+      throw new Error(`En yüksek hacimli hisseler alınamadı: ${error.message}`);
+    }
+  }
+
+  /**
+   * Watchlist'teki hisselerin verilerini getir
+   * @returns {Promise<Array>}
+   */
+  async getWatchlistData() {
+    try {
+      const watchlist = this.watchlist.getWatchlist();
+      
+      if (watchlist.length === 0) {
+        return [];
+      }
+
+      const promises = watchlist.map(async (item) => {
+        try {
+          return await this.getStock(item.symbol);
+        } catch (error) {
+          return null;
+        }
+      });
+
+      const results = await Promise.all(promises);
+      return results.filter(stock => stock !== null);
+    } catch (error) {
+      throw new Error(`Watchlist verileri alınamadı: ${error.message}`);
+    }
   }
 }
 

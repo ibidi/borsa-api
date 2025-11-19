@@ -24,8 +24,12 @@
 ## 🚀 Features / Özellikler
 
 - 📊 **BIST Indexes** - XU100, XU030, XBANK, and more
-- 📈 **Real-time Stock Data** - Live stock prices and information
-- 🔍 **Search** - Find stocks by name or symbol
+- 📈 **Stock Data** - Delayed stock prices and information
+- 🔍 **Search** - Find stocks by name or symbol (Turkish character support)
+- ⭐ **Watchlist** - Save and track your favorite stocks
+- ⚖️ **Compare** - Compare two stocks side by side
+- 📈 **Top Gainers/Losers** - See best and worst performers
+- 💹 **Volume Leaders** - Highest volume stocks
 - 💻 **Beautiful CLI** - Professional terminal interface with colors and tables
 - 📦 **API Wrapper** - Use programmatically in your code
 - 🇹🇷 **Turkish Support** - Native Turkish language support
@@ -83,6 +87,46 @@ borsa endeksler
 ```bash
 borsa ara garanti
 borsa ara turkcell
+```
+
+### İzleme Listesi (Watchlist)
+
+```bash
+# İzleme listesine ekle
+borsa watchlist --add THYAO
+borsa watchlist --add GARAN
+
+# İzleme listesini göster
+borsa watchlist
+
+# İzleme listesinden çıkar
+borsa watchlist --remove THYAO
+
+# İzleme listesini temizle
+borsa watchlist --clear
+```
+
+### Hisse Karşılaştırma
+
+```bash
+borsa karsilastir THYAO GARAN
+borsa compare AKBNK ISCTR
+```
+
+### En Çok Yükselenler/Düşenler
+
+```bash
+# En çok yükselenler (varsayılan 10)
+borsa yukselenler
+borsa yukselenler 5
+
+# En çok düşenler
+borsa dusenler
+borsa dusenler 5
+
+# En yüksek hacimli hisseler
+borsa hacim
+borsa hacim 5
 ```
 
 ## 💻 Programmatic Usage / Kod İçinde Kullanım
@@ -153,6 +197,49 @@ async function search() {
   const results = await api.searchStock('garanti');
   console.log(results);
 }
+
+// İki hisseyi karşılaştır
+async function compare() {
+  const comparison = await api.compareStocks('THYAO', 'GARAN');
+  console.log(comparison);
+}
+
+// En çok yükselenler
+async function topGainers() {
+  const gainers = await api.getTopGainers(5);
+  console.log(gainers);
+}
+
+// En çok düşenler
+async function topLosers() {
+  const losers = await api.getTopLosers(5);
+  console.log(losers);
+}
+
+// En yüksek hacimli hisseler
+async function topVolume() {
+  const volume = await api.getTopVolume(5);
+  console.log(volume);
+}
+
+// Watchlist işlemleri
+api.watchlist.addToWatchlist('THYAO', 'Türk Hava Yolları');
+api.watchlist.addToWatchlist('GARAN', 'Garanti Bankası');
+
+const watchlist = api.watchlist.getWatchlist();
+console.log(watchlist);
+
+// Watchlist verilerini getir
+async function getWatchlistData() {
+  const stocks = await api.getWatchlistData();
+  console.log(stocks);
+}
+
+// Verileri export et
+const { exportToJSON, exportToCSV } = api.utils;
+const stocks = await api.getPopularStocks();
+exportToJSON(stocks, 'stocks.json');
+exportToCSV(stocks, 'stocks.csv');
 ```
 
 ## 🎨 CLI Screenshots / Ekran Görüntüleri
@@ -205,6 +292,59 @@ Search stocks / Hisse ara
 - `query` (string) - Search term
 
 **Returns:** Promise<Array>
+
+### `compareStocks(symbol1, symbol2)`
+Compare two stocks / İki hisseyi karşılaştır
+
+**Parameters:**
+- `symbol1` (string) - First stock symbol
+- `symbol2` (string) - Second stock symbol
+
+**Returns:** Promise<Object>
+
+### `getTopGainers(limit)`
+Get top gaining stocks / En çok yükselenleri al
+
+**Parameters:**
+- `limit` (number) - Number of results (default: 10)
+
+**Returns:** Promise<Array>
+
+### `getTopLosers(limit)`
+Get top losing stocks / En çok düşenleri al
+
+**Parameters:**
+- `limit` (number) - Number of results (default: 10)
+
+**Returns:** Promise<Array>
+
+### `getTopVolume(limit)`
+Get highest volume stocks / En yüksek hacimli hisseleri al
+
+**Parameters:**
+- `limit` (number) - Number of results (default: 10)
+
+**Returns:** Promise<Array>
+
+### `getWatchlistData()`
+Get watchlist stocks data / İzleme listesi verilerini al
+
+**Returns:** Promise<Array>
+
+### Watchlist Methods
+
+- `api.watchlist.addToWatchlist(symbol, name)` - Add to watchlist
+- `api.watchlist.removeFromWatchlist(symbol)` - Remove from watchlist
+- `api.watchlist.getWatchlist()` - Get watchlist
+- `api.watchlist.clearWatchlist()` - Clear watchlist
+
+### Utility Methods
+
+- `api.utils.exportToJSON(data, filename)` - Export to JSON
+- `api.utils.exportToCSV(data, filename)` - Export to CSV
+- `api.utils.getTopGainers(stocks, limit)` - Filter top gainers
+- `api.utils.getTopLosers(stocks, limit)` - Filter top losers
+- `api.utils.getTopVolume(stocks, limit)` - Filter by volume
 
 ## 📋 Available Indexes / Mevcut Endeksler
 

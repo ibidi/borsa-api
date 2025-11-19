@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2024-11-19
+
+### Added
+- **Watchlist Feature** - Save and track favorite stocks locally
+- **Stock Comparison** - Compare two stocks side by side
+- **Top Gainers** - View stocks with highest percentage gains
+- **Top Losers** - View stocks with highest percentage losses
+- **Volume Leaders** - View stocks with highest trading volume
+- **Export Utilities** - Export data to JSON and CSV formats
+- **Utility Functions** - Helper functions for data manipulation
+- New CLI commands: `watchlist`, `karsilastir`, `yukselenler`, `dusenler`, `hacim`
+- Watchlist stored locally in `~/.borsa-api/watchlist.json`
+
+### Improved
+- Enhanced API with new methods for filtering and sorting
+- Better code organization with separate utility modules
+- More comprehensive documentation
+
 ## [1.0.4] - 2024-11-19
 
 ### Added
