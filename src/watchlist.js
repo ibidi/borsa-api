@@ -7,10 +7,19 @@ const os = require('os');
  * Kullanıcının favori hisselerini lokal olarak saklar
  */
 class WatchlistManager {
-  constructor() {
-    this.configDir = path.join(os.homedir(), '.borsa-api');
-    this.watchlistFile = path.join(this.configDir, 'watchlist.json');
-    this._ensureConfigDir();
+  constructor(options = {}) {
+    this.disabled = options.disabled || false;
+    
+    if (!this.disabled) {
+      try {
+        this.configDir = path.join(os.homedir(), '.borsa-api');
+        this.watchlistFile = path.join(this.configDir, 'watchlist.json');
+        this._ensureConfigDir();
+      } catch (error) {
+        // Serverless ortamda dosya sistemi kullanılamaz
+        this.disabled = true;
+      }
+    }
   }
 
   /**
@@ -18,8 +27,14 @@ class WatchlistManager {
    * @private
    */
   _ensureConfigDir() {
-    if (!fs.existsSync(this.configDir)) {
-      fs.mkdirSync(this.configDir, { recursive: true });
+    if (this.disabled) return;
+    
+    try {
+      if (!fs.existsSync(this.configDir)) {
+        fs.mkdirSync(this.configDir, { recursive: true });
+      }
+    } catch (error) {
+      this.disabled = true;
     }
   }
 
@@ -28,6 +43,8 @@ class WatchlistManager {
    * @returns {Array}
    */
   getWatchlist() {
+    if (this.disabled) return [];
+    
     try {
       if (fs.existsSync(this.watchlistFile)) {
         const data = fs.readFileSync(this.watchlistFile, 'utf8');
@@ -45,6 +62,10 @@ class WatchlistManager {
    * @param {string} name - Hisse adı (opsiyonel)
    */
   addToWatchlist(symbol, name = '') {
+    if (this.disabled) {
+      return { success: false, message: 'Watchlist not available in serverless environment' };
+    }
+    
     const watchlist = this.getWatchlist();
     
     // Zaten varsa ekleme
@@ -58,8 +79,12 @@ class WatchlistManager {
       addedAt: new Date().toISOString()
     });
 
-    fs.writeFileSync(this.watchlistFile, JSON.stringify(watchlist, null, 2));
-    return { success: true, message: 'İzleme listesine eklendi' };
+    try {
+      fs.writeFileSync(this.watchlistFile, JSON.stringify(watchlist, null, 2));
+      return { success: true, message: 'İzleme listesine eklendi' };
+    } catch (error) {
+      return { success: false, message: 'Failed to save watchlist' };
+    }
   }
 
   /**
@@ -67,6 +92,10 @@ class WatchlistManager {
    * @param {string} symbol - Hisse sembolü
    */
   removeFromWatchlist(symbol) {
+    if (this.disabled) {
+      return { success: false, message: 'Watchlist not available in serverless environment' };
+    }
+    
     let watchlist = this.getWatchlist();
     const initialLength = watchlist.length;
     
@@ -76,16 +105,28 @@ class WatchlistManager {
       return { success: false, message: 'Hisse izleme listesinde bulunamadı' };
     }
 
-    fs.writeFileSync(this.watchlistFile, JSON.stringify(watchlist, null, 2));
-    return { success: true, message: 'İzleme listesinden çıkarıldı' };
+    try {
+      fs.writeFileSync(this.watchlistFile, JSON.stringify(watchlist, null, 2));
+      return { success: true, message: 'İzleme listesinden çıkarıldı' };
+    } catch (error) {
+      return { success: false, message: 'Failed to save watchlist' };
+    }
   }
 
   /**
    * Watchlist'i temizle
    */
   clearWatchlist() {
-    fs.writeFileSync(this.watchlistFile, JSON.stringify([], null, 2));
-    return { success: true, message: 'İzleme listesi temizlendi' };
+    if (this.disabled) {
+      return { success: false, message: 'Watchlist not available in serverless environment' };
+    }
+    
+    try {
+      fs.writeFileSync(this.watchlistFile, JSON.stringify([], null, 2));
+      return { success: true, message: 'İzleme listesi temizlendi' };
+    } catch (error) {
+      return { success: false, message: 'Failed to clear watchlist' };
+    }
   }
 }
 

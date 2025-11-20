@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.2] - 2024-11-20
+
+### Fixed
+- Made WatchlistManager serverless-compatible
+- Gracefully handles environments without file system access
+- Prevents errors in Vercel and other serverless platforms
+
 ## [1.1.1] - 2024-11-19
 
 ### Fixed
