@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2024-11-19
+
+### Fixed
+- Fixed npm package missing data-provider.js file
+- Updated .npmignore to include all necessary source files
+
 ## [1.1.0] - 2024-11-19
 
 ### Added

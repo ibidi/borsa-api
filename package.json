@@ -1,6 +1,6 @@
 {
   "name": "borsa-api",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Turkish Stock Market (BIST) API wrapper with CLI support - Delayed data for educational use only - Türk borsası için API ve CLI aracı - Sadece eğitim amaçlı gecikmeli veri",
   "main": "src/index.js",
   "bin": {

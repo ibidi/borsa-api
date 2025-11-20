@@ -5,4 +5,3 @@ node_modules
 test/
 .vscode/
 .idea/
-src/data-provider.js
