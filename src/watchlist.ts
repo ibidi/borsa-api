@@ -1,15 +1,20 @@
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
+import { WatchlistItem, WatchlistResult, WatchlistManagerOptions } from './types';
 
 /**
  * Watchlist Manager - İzleme Listesi Yöneticisi
  * Kullanıcının favori hisselerini lokal olarak saklar
  */
 class WatchlistManager {
-  constructor(options = {}) {
+  private disabled: boolean;
+  private configDir?: string;
+  private watchlistFile?: string;
+
+  constructor(options: WatchlistManagerOptions = {}) {
     this.disabled = options.disabled || false;
-    
+
     if (!this.disabled) {
       try {
         this.configDir = path.join(os.homedir(), '.borsa-api');
@@ -24,11 +29,10 @@ class WatchlistManager {
 
   /**
    * Config klasörünü oluştur
-   * @private
    */
-  _ensureConfigDir() {
-    if (this.disabled) return;
-    
+  private _ensureConfigDir(): void {
+    if (this.disabled || !this.configDir) return;
+
     try {
       if (!fs.existsSync(this.configDir)) {
         fs.mkdirSync(this.configDir, { recursive: true });
@@ -40,11 +44,10 @@ class WatchlistManager {
 
   /**
    * Watchlist'i oku
-   * @returns {Array}
    */
-  getWatchlist() {
-    if (this.disabled) return [];
-    
+  getWatchlist(): WatchlistItem[] {
+    if (this.disabled || !this.watchlistFile) return [];
+
     try {
       if (fs.existsSync(this.watchlistFile)) {
         const data = fs.readFileSync(this.watchlistFile, 'utf8');
@@ -58,16 +61,14 @@ class WatchlistManager {
 
   /**
    * Watchlist'e hisse ekle
-   * @param {string} symbol - Hisse sembolü
-   * @param {string} name - Hisse adı (opsiyonel)
    */
-  addToWatchlist(symbol, name = '') {
-    if (this.disabled) {
+  addToWatchlist(symbol: string, name: string = ''): WatchlistResult {
+    if (this.disabled || !this.watchlistFile) {
       return { success: false, message: 'Watchlist not available in serverless environment' };
     }
-    
+
     const watchlist = this.getWatchlist();
-    
+
     // Zaten varsa ekleme
     if (watchlist.some(item => item.symbol === symbol.toUpperCase())) {
       return { success: false, message: 'Bu hisse zaten izleme listesinde' };
@@ -89,18 +90,17 @@ class WatchlistManager {
 
   /**
    * Watchlist'ten hisse çıkar
-   * @param {string} symbol - Hisse sembolü
    */
-  removeFromWatchlist(symbol) {
-    if (this.disabled) {
+  removeFromWatchlist(symbol: string): WatchlistResult {
+    if (this.disabled || !this.watchlistFile) {
       return { success: false, message: 'Watchlist not available in serverless environment' };
     }
-    
+
     let watchlist = this.getWatchlist();
     const initialLength = watchlist.length;
-    
+
     watchlist = watchlist.filter(item => item.symbol !== symbol.toUpperCase());
-    
+
     if (watchlist.length === initialLength) {
       return { success: false, message: 'Hisse izleme listesinde bulunamadı' };
     }
@@ -116,11 +116,11 @@ class WatchlistManager {
   /**
    * Watchlist'i temizle
    */
-  clearWatchlist() {
-    if (this.disabled) {
+  clearWatchlist(): WatchlistResult {
+    if (this.disabled || !this.watchlistFile) {
       return { success: false, message: 'Watchlist not available in serverless environment' };
     }
-    
+
     try {
       fs.writeFileSync(this.watchlistFile, JSON.stringify([], null, 2));
       return { success: true, message: 'İzleme listesi temizlendi' };
@@ -130,4 +130,4 @@ class WatchlistManager {
   }
 }
 
-module.exports = WatchlistManager;
+export = WatchlistManager;

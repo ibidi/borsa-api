@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2024-11-23
+
+### Changed
+- **TypeScript Migration** - Migrated entire codebase from JavaScript to TypeScript
+- Added comprehensive type definitions for all data structures
+- Improved developer experience with IntelliSense and type safety
+- Added TypeScript declaration files (.d.ts) for better IDE support
+- Updated build process to compile TypeScript to JavaScript
+- Updated yahoo-finance2 integration for v3 API compatibility
+
+### Added
+- **Historical Data** - Get historical price data with customizable periods and intervals
+  - `getHistoricalData()` method for programmatic access
+  - `borsa gecmis` CLI command
+  - Support for multiple time periods (1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max)
+  - Support for different intervals (daily, weekly, monthly)
+- **Stock Details** - Extended stock information including:
+  - Market capitalization
+  - P/E ratio (F/K oranı)
+  - EPS (Hisse başına kazanç)
+  - Dividend yield (Temettü verimi)
+  - 52-week high/low
+  - Average volume
+  - Beta coefficient
+  - Sector and industry information
+  - Company description
+  - `getStockDetails()` method for programmatic access
+  - `borsa detay` CLI command
+- Type definitions for HistoricalData, ChartMeta, StockDetails, and more
+- Source maps for better debugging experience
+- Declaration maps for improved IDE navigation
+
 ## [1.1.2] - 2024-11-20
 
 ### Fixed

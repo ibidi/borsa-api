@@ -1,26 +1,18 @@
-/**
- * Utility Functions
- */
+import * as fs from 'fs';
+import { StockData } from './types';
 
 /**
  * Verileri JSON formatında export et
- * @param {Object|Array} data - Export edilecek veri
- * @param {string} filename - Dosya adı
  */
-function exportToJSON(data, filename = 'borsa-data.json') {
-  const fs = require('fs');
+export function exportToJSON(data: any, filename: string = 'borsa-data.json'): string {
   fs.writeFileSync(filename, JSON.stringify(data, null, 2));
   return filename;
 }
 
 /**
  * Verileri CSV formatında export et
- * @param {Array} data - Export edilecek veri (array of objects)
- * @param {string} filename - Dosya adı
  */
-function exportToCSV(data, filename = 'borsa-data.csv') {
-  const fs = require('fs');
-  
+export function exportToCSV(data: any[], filename: string = 'borsa-data.csv'): string {
   if (!Array.isArray(data) || data.length === 0) {
     throw new Error('CSV export için veri array olmalı ve boş olmamalı');
   }
@@ -48,11 +40,8 @@ function exportToCSV(data, filename = 'borsa-data.csv') {
 
 /**
  * Basit ASCII grafik oluştur
- * @param {Array} values - Değerler
- * @param {number} height - Grafik yüksekliği
- * @returns {string}
  */
-function createASCIIChart(values, height = 10) {
+export function createASCIIChart(values: number[], height: number = 10): string {
   if (!values || values.length === 0) return '';
 
   const max = Math.max(...values);
@@ -62,7 +51,7 @@ function createASCIIChart(values, height = 10) {
   if (range === 0) return '─'.repeat(values.length);
 
   const normalized = values.map(v => Math.round(((v - min) / range) * height));
-  
+
   let chart = '';
   for (let h = height; h >= 0; h--) {
     for (let i = 0; i < normalized.length; i++) {
@@ -80,11 +69,8 @@ function createASCIIChart(values, height = 10) {
 
 /**
  * Yüzdelik değişime göre sırala
- * @param {Array} stocks - Hisse listesi
- * @param {string} order - 'asc' veya 'desc'
- * @returns {Array}
  */
-function sortByChange(stocks, order = 'desc') {
+export function sortByChange(stocks: StockData[], order: 'asc' | 'desc' = 'desc'): StockData[] {
   return stocks.sort((a, b) => {
     const changeA = a.changePercent || 0;
     const changeB = b.changePercent || 0;
@@ -94,11 +80,8 @@ function sortByChange(stocks, order = 'desc') {
 
 /**
  * En çok yükselenleri filtrele
- * @param {Array} stocks - Hisse listesi
- * @param {number} limit - Limit
- * @returns {Array}
  */
-function getTopGainers(stocks, limit = 10) {
+export function getTopGainers(stocks: StockData[], limit: number = 10): StockData[] {
   return sortByChange(stocks, 'desc')
     .filter(s => s.changePercent > 0)
     .slice(0, limit);
@@ -106,11 +89,8 @@ function getTopGainers(stocks, limit = 10) {
 
 /**
  * En çok düşenleri filtrele
- * @param {Array} stocks - Hisse listesi
- * @param {number} limit - Limit
- * @returns {Array}
  */
-function getTopLosers(stocks, limit = 10) {
+export function getTopLosers(stocks: StockData[], limit: number = 10): StockData[] {
   return sortByChange(stocks, 'asc')
     .filter(s => s.changePercent < 0)
     .slice(0, limit);
@@ -118,22 +98,9 @@ function getTopLosers(stocks, limit = 10) {
 
 /**
  * Hacme göre sırala
- * @param {Array} stocks - Hisse listesi
- * @param {number} limit - Limit
- * @returns {Array}
  */
-function getTopVolume(stocks, limit = 10) {
+export function getTopVolume(stocks: StockData[], limit: number = 10): StockData[] {
   return stocks
     .sort((a, b) => (b.volume || 0) - (a.volume || 0))
     .slice(0, limit);
 }
-
-module.exports = {
-  exportToJSON,
-  exportToCSV,
-  createASCIIChart,
-  sortByChange,
-  getTopGainers,
-  getTopLosers,
-  getTopVolume
-};

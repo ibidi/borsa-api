@@ -34,6 +34,7 @@
 - 📦 **API Wrapper** - Use programmatically in your code
 - 🇹🇷 **Turkish Support** - Native Turkish language support
 - ⚡ **Fast & Reliable** - Optimized for performance
+- 📘 **TypeScript** - Full TypeScript support with type definitions
 
 ## 📦 Installation / Kurulum
 
@@ -129,6 +130,20 @@ borsa hacim
 borsa hacim 5
 ```
 
+### Historik Veri ve Detaylı Bilgi
+
+```bash
+# Geçmiş fiyat verileri
+borsa gecmis THYAO          # Son 1 ay (varsayılan)
+borsa gecmis THYAO 5d       # Son 5 gün
+borsa gecmis THYAO 1y       # Son 1 yıl
+borsa historical AKBNK 3mo  # Son 3 ay
+
+# Detaylı hisse bilgisi (market cap, P/E ratio, sektör, vb.)
+borsa detay THYAO
+borsa details GARAN
+```
+
 ## 💻 Programmatic Usage / Kod İçinde Kullanım
 
 ```javascript
@@ -196,6 +211,57 @@ async function getAllIndexes() {
 async function search() {
   const results = await api.searchStock('garanti');
   console.log(results);
+}
+
+// Historik veri
+async function getHistorical() {
+  const data = await api.getHistoricalData('THYAO', {
+    period: '1mo',  // 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max
+    interval: '1d'  // 1d, 1wk, 1mo
+  });
+  console.log(data);
+  // {
+  //   meta: {
+  //     currency: 'TRY',
+  //     symbol: 'THYAO',
+  //     longName: 'Türk Hava Yollari...',
+  //     fiftyTwoWeekHigh: 346.25,
+  //     fiftyTwoWeekLow: 249.20,
+  //     ...
+  //   },
+  //   quotes: [
+  //     {
+  //       date: Date,
+  //       open: 273.00,
+  //       high: 274.75,
+  //       low: 271.50,
+  //       close: 273.00,
+  //       adjClose: 266.68,
+  //       volume: 19991989
+  //     },
+  //     ...
+  //   ]
+  // }
+}
+
+// Detaylı hisse bilgisi
+async function getDetails() {
+  const details = await api.getStockDetails('THYAO');
+  console.log(details);
+  // {
+  //   ...StockData,
+  //   marketCap: 123456789000,
+  //   peRatio: 15.23,
+  //   eps: 12.34,
+  //   dividendYield: 0.025,
+  //   fiftyTwoWeekHigh: 346.25,
+  //   fiftyTwoWeekLow: 249.20,
+  //   averageVolume: 25000000,
+  //   beta: 1.15,
+  //   sector: 'Industrials',
+  //   industry: 'Airlines',
+  //   description: 'Company description...'
+  // }
 }
 
 // İki hisseyi karşılaştır

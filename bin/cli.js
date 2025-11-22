@@ -4,7 +4,7 @@ const { Command } = require('commander');
 const chalk = require('chalk');
 const Table = require('cli-table3');
 const ora = require('ora');
-const BorsaAPI = require('../src/index');
+const BorsaAPI = require('../dist/index');
 
 const program = new Command();
 const api = new BorsaAPI();
@@ -12,7 +12,7 @@ const api = new BorsaAPI();
 program
   .name('borsa')
   .description('Türk Borsası (BIST) CLI aracı')
-  .version('1.1.2');
+  .version('1.2.0');
 
 // Endeks komutu
 program
@@ -497,6 +497,171 @@ program
       });
       
       console.log(table.toString());
+      console.log('');
+      
+    } catch (error) {
+      spinner.fail(chalk.red('Hata!'));
+      console.error(chalk.red(error.message));
+      process.exit(1);
+    }
+  });
+
+// Historik veri komutu
+program
+  .command('gecmis <symbol> [period]')
+  .alias('historical')
+  .description('Hisse senedinin geçmiş verilerini gösterir (period: 1d, 5d, 1mo, 3mo, 6mo, 1y)')
+  .action(async (symbol, period = '1mo') => {
+    const spinner = ora(`${symbol} geçmiş verileri getiriliyor...`).start();
+    
+    try {
+      const data = await api.getHistoricalData(symbol, { period, interval: '1d' });
+      spinner.succeed(chalk.green('Veri alındı!'));
+      
+      console.log('\n' + chalk.blue.bold(`📈 ${data.meta.longName} (${symbol.toUpperCase()})`));
+      console.log(chalk.gray('─'.repeat(80)) + '\n');
+      
+      // Son 10 günü göster
+      const recentQuotes = data.quotes.slice(-10);
+      
+      const table = new Table({
+        head: [
+          chalk.white.bold('Tarih'),
+          chalk.white.bold('Açılış'),
+          chalk.white.bold('Yüksek'),
+          chalk.white.bold('Düşük'),
+          chalk.white.bold('Kapanış'),
+          chalk.white.bold('Hacim')
+        ],
+        style: {
+          head: [],
+          border: ['gray']
+        }
+      });
+      
+      recentQuotes.forEach(quote => {
+        table.push([
+          quote.date.toLocaleDateString('tr-TR'),
+          chalk.cyan(quote.open.toFixed(2) + ' ₺'),
+          chalk.green(quote.high.toFixed(2) + ' ₺'),
+          chalk.red(quote.low.toFixed(2) + ' ₺'),
+          chalk.yellow(quote.close.toFixed(2) + ' ₺'),
+          chalk.magenta(quote.volume.toLocaleString('tr-TR'))
+        ]);
+      });
+      
+      console.log(table.toString());
+      
+      // Özet bilgiler
+      const firstQuote = data.quotes[0];
+      const lastQuote = data.quotes[data.quotes.length - 1];
+      const change = ((lastQuote.close - firstQuote.close) / firstQuote.close) * 100;
+      const changeColor = change >= 0 ? chalk.green : chalk.red;
+      
+      console.log('\n' + chalk.white.bold('📊 Özet'));
+      console.log(chalk.gray('─'.repeat(50)));
+      console.log(`${chalk.white('Toplam Gün:')}     ${data.quotes.length}`);
+      console.log(`${chalk.white('İlk Kapanış:')}    ${firstQuote.close.toFixed(2)} ₺`);
+      console.log(`${chalk.white('Son Kapanış:')}    ${lastQuote.close.toFixed(2)} ₺`);
+      console.log(`${chalk.white('Değişim:')}        ${changeColor(change.toFixed(2) + '%')}`);
+      console.log(`${chalk.white('52H Yüksek:')}     ${chalk.green(data.meta.fiftyTwoWeekHigh.toFixed(2) + ' ₺')}`);
+      console.log(`${chalk.white('52H Düşük:')}      ${chalk.red(data.meta.fiftyTwoWeekLow.toFixed(2) + ' ₺')}`);
+      console.log(chalk.gray('─'.repeat(50)) + '\n');
+      
+    } catch (error) {
+      spinner.fail(chalk.red('Hata!'));
+      console.error(chalk.red(error.message));
+      process.exit(1);
+    }
+  });
+
+// Detaylı bilgi komutu
+program
+  .command('detay <symbol>')
+  .alias('details')
+  .description('Hisse senedinin detaylı bilgilerini gösterir')
+  .action(async (symbol) => {
+    const spinner = ora(`${symbol} detaylı bilgileri getiriliyor...`).start();
+    
+    try {
+      const data = await api.getStockDetails(symbol);
+      spinner.succeed(chalk.green('Veri alındı!'));
+      
+      console.log('\n' + chalk.blue.bold(`📊 ${data.name} (${data.symbol})`));
+      console.log(chalk.gray('─'.repeat(80)) + '\n');
+      
+      // Fiyat bilgileri
+      console.log(chalk.white.bold('💰 Fiyat Bilgileri'));
+      console.log(chalk.gray('─'.repeat(50)));
+      const changeColor = data.change >= 0 ? chalk.green : chalk.red;
+      const changeSymbol = data.change >= 0 ? '▲' : '▼';
+      console.log(`${chalk.white('Güncel Fiyat:')}   ${chalk.yellow.bold(data.price.toFixed(2) + ' ₺')}`);
+      console.log(`${chalk.white('Değişim:')}        ${changeColor(changeSymbol + ' ' + data.change.toFixed(2) + ' (' + data.changePercent.toFixed(2) + '%)')}`);
+      console.log(`${chalk.white('Açılış:')}         ${data.open.toFixed(2)} ₺`);
+      console.log(`${chalk.white('Yüksek:')}         ${chalk.green(data.high.toFixed(2) + ' ₺')}`);
+      console.log(`${chalk.white('Düşük:')}          ${chalk.red(data.low.toFixed(2) + ' ₺')}`);
+      
+      if (data.fiftyTwoWeekHigh && data.fiftyTwoWeekLow) {
+        console.log(`${chalk.white('52H Yüksek:')}     ${chalk.green(data.fiftyTwoWeekHigh.toFixed(2) + ' ₺')}`);
+        console.log(`${chalk.white('52H Düşük:')}      ${chalk.red(data.fiftyTwoWeekLow.toFixed(2) + ' ₺')}`);
+      }
+      
+      // Şirket bilgileri
+      console.log('\n' + chalk.white.bold('🏢 Şirket Bilgileri'));
+      console.log(chalk.gray('─'.repeat(50)));
+      
+      if (data.marketCap) {
+        const marketCapB = (data.marketCap / 1e9).toFixed(2);
+        console.log(`${chalk.white('Piyasa Değeri:')}  ${chalk.cyan(marketCapB + 'B ₺')}`);
+      }
+      
+      if (data.sector) {
+        console.log(`${chalk.white('Sektör:')}         ${data.sector}`);
+      }
+      
+      if (data.industry) {
+        console.log(`${chalk.white('Endüstri:')}       ${data.industry}`);
+      }
+      
+      // Finansal oranlar
+      if (data.peRatio || data.eps || data.dividendYield || data.beta) {
+        console.log('\n' + chalk.white.bold('📈 Finansal Oranlar'));
+        console.log(chalk.gray('─'.repeat(50)));
+        
+        if (data.peRatio) {
+          console.log(`${chalk.white('F/K Oranı:')}      ${data.peRatio.toFixed(2)}`);
+        }
+        
+        if (data.eps) {
+          console.log(`${chalk.white('HBK:')}            ${data.eps.toFixed(2)} ₺`);
+        }
+        
+        if (data.dividendYield) {
+          console.log(`${chalk.white('Temettü Verimi:')} ${(data.dividendYield * 100).toFixed(2)}%`);
+        }
+        
+        if (data.beta) {
+          console.log(`${chalk.white('Beta:')}           ${data.beta.toFixed(2)}`);
+        }
+      }
+      
+      // Hacim bilgileri
+      console.log('\n' + chalk.white.bold('📊 Hacim Bilgileri'));
+      console.log(chalk.gray('─'.repeat(50)));
+      console.log(`${chalk.white('Günlük Hacim:')}   ${chalk.magenta(data.volume.toLocaleString('tr-TR'))}`);
+      
+      if (data.averageVolume) {
+        console.log(`${chalk.white('Ort. Hacim:')}     ${chalk.magenta(data.averageVolume.toLocaleString('tr-TR'))}`);
+      }
+      
+      // Açıklama
+      if (data.description) {
+        console.log('\n' + chalk.white.bold('📝 Şirket Açıklaması'));
+        console.log(chalk.gray('─'.repeat(50)));
+        const shortDesc = data.description.substring(0, 200) + (data.description.length > 200 ? '...' : '');
+        console.log(chalk.gray(shortDesc));
+      }
+      
       console.log('');
       
     } catch (error) {
