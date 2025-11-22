@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "borsa": "./bin/cli.js"
+    "borsa": "bin/cli.js"
   },
   "scripts": {
     "build": "tsc",
@@ -45,7 +45,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ibidi/borsa-api.git"
+    "url": "git+https://github.com/ibidi/borsa-api.git"
   },
   "bugs": {
     "url": "https://github.com/ibidi/borsa-api/issues"
