@@ -18,7 +18,7 @@ class DataProvider {
   private yahooFinance: any;
 
   constructor() {
-    this.yahooFinance = new YahooFinanceClass();
+    this.yahooFinance = new YahooFinanceClass({ suppressNotices: ['yahooSurvey'] });
   }
 
   async fetchQuote(symbol: string): Promise<QuoteData> {
